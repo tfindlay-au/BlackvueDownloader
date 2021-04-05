@@ -52,3 +52,24 @@ The file extensions include:
 - thm = Unknown
 - mp4 = H265 encoded video with AAC audio in an MPEG container
 
+### The API
+The principal of this script to use the HTTP end point exposed on the camera (whilst it is powered on and connected to the network).
+
+Querying the IP of the camera and `blackvue_vod.cgi` will provide a list of files available on the device eg.
+```
+
+# curl http://10.1.10.110/blackvue_vod.cgi
+n:/Record/19700101_000000_PF.mp4,s:1000000
+n:/Record/19700101_000000_PF.mp4,s:1000000
+n:/Record/19700101_000000_PF.mp4,s:1000000
+..
+
+```
+
+We pipe output through sed a few times to clean it up. This can probably be optimised into a single statement. The result is a list of date and timestamps that
+make up the filename prefixes. Each of these prefixes is passed to a bash function where a number of HTTP requests are made by curl
+in an attempt to get the video, gps and any other data available. Specifically:
+- .mp4 Front and Rear video file
+- .thm Front and rear thm files. Unknown, possibly contain thumbnails.
+- .gps From the main unit, plain text format containing GPS long/lat coordinates
+- .3gf From the main unit, contains gyroscope/accelerometer data from IMU
